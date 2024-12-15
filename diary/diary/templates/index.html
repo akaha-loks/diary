@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Главная страница
+{% endblock %}
+
+{% block body %}
+<div class="mt-5">
+    <h1>Личный дневник</h1>
+</div>
+
+{% if entries %}
+    <h3 class="mt-5">Твои записи:</h3>
+    <div class="list-group" style="max-height: 600px; overflow-y: auto;">
+        {% for entry in entries %}
+            <li class="list-group-item mt-4" style="border-radius: 15px; border: 1px solid #ddd; background-color: #c1c1c1">
+                <h5>{{ entry.title }}</h5>
+                <p class="mt-4">{{ entry.content[:100] }}...</p>
+                <p><small>Дата создания: {{ entry.date_created.strftime('%d/%m/%Y | Время: %H:%M:%S') }}</small></p>
+                <a href="/edit-entry/{{ entry.id }}" class="btn btn-warning btn-sm">Редактировать</a>
+                <a href="/delete-entry/{{ entry.id }}" class="btn btn-danger btn-sm">Удалить</a>
+            </li>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="mt-5">У тебя еще нет записей в дневнике. Добавь свою первую запись!</p>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    <!-- Кнопка добавления записи -->
+    <a href="/add-entry" class="btn btn-primary">Добавить запись</a>
+
+    <!-- Кнопки сортировки справа -->
+    <div class="btn-group" role="group" aria-label="Sort">
+        <a href="{{ url_for('index', sort_by='date') }}"
+           class="btn btn-outline-secondary {% if sort_by == 'date' or sort_by is not defined %}active bg-dark text-white{% endif %}">
+           Сортировать по дате
+        </a>
+        <a href="{{ url_for('index', sort_by='title') }}"
+           class="btn btn-outline-secondary {% if sort_by == 'title' %}active bg-dark text-white{% endif %}">
+           Сортировать по алфавиту
+        </a>
+    </div>
+</div>
+
+{% endblock %}

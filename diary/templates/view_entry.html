@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ entry.title }}
+{% endblock %}
+
+{% block body %}
+<style>
+    .entry-content {
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        background-color: #c8c8c8; /* Легкий фон для контента */
+        font-size: large;
+        max-height: 600px; /* Устанавливаем максимальную высоту */
+        overflow-y: auto; /* Включаем прокрутку по вертикали */
+    }
+
+    .entry-info {
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #555; /* Немного тусклее для информации */
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <h1>{{ entry.title }}</h1>
+
+    <div class="entry-content">
+        {{ entry.content | safe }}
+    </div>
+
+    <div class="entry-info">
+        <p><strong>Дата создания:</strong> <span class="entry-date">{{ entry.date_created.strftime('%d %B %Y, %H:%M:%S') }}</span></p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="btn btn-secondary" id="back-button">Назад</a>
+</div>
+{% endblock %}

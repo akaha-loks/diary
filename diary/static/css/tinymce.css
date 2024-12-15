@@ -1,0 +1,12 @@
+/* Это стили только для TinyMCE */
+body {
+    font-family: Arial, sans-serif;
+}
+
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic; /* Здесь можно задать стиль италик для текста в редакторе */
+}

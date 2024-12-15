@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Добавить запись
+{% endblock %}
+
+{% block body %}
+<h1 class="mt-5">Добавить новую запись</h1>
+<form method="POST" id="add-form">
+    <div class="mb-3 mt-5">
+        <label for="title" class="form-label">Заголовок</label>
+        <input type="text" class="form-control" id="title" name="title" required
+               style="border-radius: 10px; border: 1px solid #ddd; background-color: #c1c1c1;">
+    </div>
+    <div class="mb-3">
+        <label for="content" class="form-label">Содержание</label>
+        <textarea class="form-control" id="content" name="content" rows="5"
+                  style="border-radius: 15px; border: 1px solid #ddd; background-color: #c1c1c1;"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить запись</button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary" id="back-button">Назад</a>
+</form>
+
+<script src="https://cdn.tiny.cloud/1/mtj2adpd9fp9dod9nzm8oil8owteqe2kw7paxbmonvahwc8d/tinymce/7/tinymce.min.js"
+        referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: 'textarea#content',
+        plugins: [
+            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'lists', 'searchreplace', 'table', 'visualblocks',
+            'wordcount'
+        ],
+        toolbar: 'undo redo | bold italic underline strikethrough | numlist bullist indent outdent | table | wordcount',
+        menubar: false,
+        height: 450,
+        content_css: '/static/css/tinymce.css'  // Указываем отдельный файл стилей для редактора
+    });
+</script>
+
+
+<script>
+    const form = document.getElementById('add-form');
+    const backButton = document.getElementById('back-button');
+    const titleInput = document.getElementById('title');
+
+    let isFormChanged = false;
+
+    form.addEventListener('input', function () {
+        isFormChanged = true; // Форма изменена
+    });
+
+    form.addEventListener('submit', function (event) {
+        const titleValue = titleInput.value.trim();
+        if (titleValue.length === 0) {
+            alert("Заголовок не может состоять только из пробелов.");
+            event.preventDefault();
+        }
+    });
+
+    backButton.addEventListener('click', function (event) {
+        if (isFormChanged) {
+            const confirmation = confirm("Вы не сохранили изменения. Вы уверены, что хотите выйти?");
+            if (!confirmation) {
+                event.preventDefault(); // Отменить переход
+            }
+        }
+    });
+</script>
+{% endblock %}
