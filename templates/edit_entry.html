@@ -9,6 +9,14 @@
 
 <form method="POST" id="edit-form">
     <div class="mb-3 mt-5">
+        <label for="category">Категория:</label>
+        <select name="category" id="category" class="form-control">
+            <option value="" {% if not entry or not entry.category %}selected{% endif %}>Без категории</option>
+            <option value="Работа" {% if entry and entry.category == 'Работа' %}selected{% endif %}>Работа</option>
+            <option value="Хобби" {% if entry and entry.category == 'Хобби' %}selected{% endif %}>Хобби</option>
+            <option value="Учеба" {% if entry and entry.category == 'Учеба' %}selected{% endif %}>Учеба</option>
+        </select>
+
         <label for="title" class="form-label">Заголовок</label>
         <input type="text" class="form-control" id="title" name="title" value="{{ entry.title }}" required
                style="border-radius: 10px; border: 1px solid #ddd; background-color: #c1c1c1;">
@@ -21,8 +29,11 @@
     <button type="submit" class="btn btn-primary">Сохранить изменения</button>
     <a href="{{ url_for('index') }}" class="btn btn-secondary" id="back-button">Назад</a>
 </form>
+
 <!-- Отображение даты последнего редактирования -->
+{% if entry.date_updated %}
 <p class="mt-5"><strong>Последнее редактирование:</strong> {{ entry.date_updated.strftime('Дата: %d/%m/%Y | Время:%H:%M') }}</p>
+{% endif %}
 
 <!-- Подключение TinyMCE -->
 <script src="https://cdn.tiny.cloud/1/mtj2adpd9fp9dod9nzm8oil8owteqe2kw7paxbmonvahwc8d/tinymce/7/tinymce.min.js"

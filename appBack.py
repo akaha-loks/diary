@@ -43,13 +43,13 @@ class Entry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone))  # Используем KGT
-    date_updated = db.Column(db.DateTime, default=lambda: datetime.now(timezone), onupdate=lambda: datetime.now(timezone))  # Обновляем с учетом часовой зоны
+    category = db.Column(db.String(50), nullable=False, default='Все категории')  # Категория по умолчанию
+    date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone))
+    date_updated = db.Column(db.DateTime, default=lambda: datetime.now(timezone), onupdate=lambda: datetime.now(timezone))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f'<Entry {self.title}>'
-
 
 # Главная страница
 @app.route('/')
@@ -57,31 +57,33 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('signin'))
 
+    selected_category = request.args.get('category', 'Все категории')  # Получаем выбранную категорию
     query = request.args.get('query', '').strip().lower()
     user_id = session['user_id']
 
-    all_entries = Entry.query.filter_by(user_id=user_id).order_by(Entry.date_created.desc()).all()
+    # Фильтрация по категории
+    if selected_category == 'Все категории':
+        all_entries = Entry.query.filter_by(user_id=user_id).order_by(Entry.date_created.desc()).all()
+    else:
+        all_entries = Entry.query.filter_by(user_id=user_id, category=selected_category).order_by(Entry.date_created.desc()).all()
 
+    # Фильтрация по поисковому запросу
     if query:
-        entries = [entry for entry in all_entries if query in entry.title.lower()]
+        entries = [entry for entry in all_entries if query in entry.title.lower() or query in entry.content.lower()]
     else:
         entries = all_entries
 
     days_of_week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     months_of_year = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"]
 
-    # Настроим правильный часовой пояс для Бишкека
     timezone = pytz.timezone('Asia/Bishkek')
     now = datetime.now(timezone)
 
     current_date = f"Сегодня: {days_of_week[now.weekday()]}, {now.day} {months_of_year[now.month - 1]} {now.year} года"
 
-    return render_template('index.html', entries=entries, current_date=current_date, query=query)
-
+    return render_template('index.html', entries=entries, current_date=current_date, query=query, selected_category=selected_category)
 
 # Регистрация
-import requests
-
 @app.route('/registr', methods=['GET', 'POST'])
 def registr():
     if request.method == 'POST':
@@ -156,7 +158,8 @@ def add_entry():
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
-        new_entry = Entry(title=title, content=content, user_id=session['user_id'])
+        category = request.form.get('category', 'Все категории')  # Получаем категорию
+        new_entry = Entry(title=title, content=content, category=category, user_id=session['user_id'])
         try:
             db.session.add(new_entry)
             db.session.commit()
@@ -166,23 +169,32 @@ def add_entry():
 
     return render_template('add_entry.html')
 
-# Редактирование записи
-@app.route('/edit-entry/<int:id>', methods=['GET', 'POST'])
-def edit_entry(id):
-    if 'user_id' not in session:
-        return redirect(url_for('signin'))
 
-    entry = Entry.query.get_or_404(id)
-    if entry.user_id != session['user_id']:
-        return "You do not have permission to edit this entry."
+# Редактирование записи
+@app.route('/edit-entry/<int:entry_id>', methods=['GET', 'POST'])
+def edit_entry(entry_id):
+    entry = Entry.query.get_or_404(entry_id)
 
     if request.method == 'POST':
-        entry.title = request.form['title']
-        entry.content = request.form['content']
-        db.session.commit()
-        return redirect(url_for('index'))
+        title = request.form['title']
+        content = request.form['content']
+        category = request.form.get('category')  # Это извлекает выбранную категорию
+
+        if not title.strip():  # Проверка, чтобы заголовок не был пустым
+            flash('Заголовок не может быть пустым')
+            return redirect(url_for('edit_entry', entry_id=entry.id))
+
+        # Обновляем данные
+        entry.title = title
+        entry.content = content
+        entry.category = category  # Обновляем категорию
+
+        db.session.commit()  # Сохраняем изменения в базе данных
+        flash('Запись успешно обновлена!')
+        return redirect(url_for('index'))  # Перенаправляем на главную страницу
 
     return render_template('edit_entry.html', entry=entry)
+
 
 # Удаление записи
 @app.route('/delete-entry/<int:id>')
@@ -214,13 +226,8 @@ def view_entry(entry_id):
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     # Логика для восстановления пароля
-    return render_template('forgot-password.html')
+    return render_template('forgot_password.html')
 
 
-# Инициализация базы данных
-with app.app_context():
-    db.create_all()
-
-# Запуск приложения
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

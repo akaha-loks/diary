@@ -9,12 +9,19 @@
     <h1>Личный дневник</h1>
 </div>
 
-<!-- Форма поиска и заголовок -->
+<!-- Форма поиска и фильтрации по категориям -->
 <div class="d-flex justify-content-between align-items-center mt-5">
     <h3>Твои записи:</h3>
-    <form method="get" action="{{ url_for('index') }}" style="width: 400px;">
+    <form method="get" action="{{ url_for('index') }}" style="width: 500px;">
         <div class="input-group">
-            <input type="text" name="query" class="form-control" placeholder="Поиск записей" value="{{ request.args.get('query', '') }}">
+            <select name="category" class="form-control">
+                <option value="Все категории" {% if selected_category == 'Все категории' %}selected{% endif %}>Все категории</option>
+                <option value="Работа" {% if selected_category == 'Работа' %}selected{% endif %}>Работа</option>
+                <option value="Хобби" {% if selected_category == 'Хобби' %}selected{% endif %}>Хобби</option>
+                <option value="Учеба" {% if selected_category == 'Учеба' %}selected{% endif %}>Учеба</option>
+            </select>
+            <input type="text" name="query" class="form-control" placeholder="Поиск записей"
+                   value="{{ query }}">
             <button class="btn btn-primary" type="submit">Поиск</button>
         </div>
     </form>
@@ -25,22 +32,24 @@
 {% endif %}
 
 {% if entries %}
-    <div class="list-group mt-4" style="max-height: 550px; overflow-y: auto;">
-        {% for entry in entries %}
-            <li class="list-group-item mt-4" style="border-radius: 15px; border: 1px solid #ddd; background-color: #c1c1c1">
-                <h5>{{ entry.title }}</h5>
-                <div class="mt-4" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
-                    {{ entry.content[:100] | safe }}
-                </div>
-                <p><small>Дата создания: {{ entry.date_created.strftime('%d/%m/%Y | Время: %H:%M:%S') }}</small></p>
-                <a href="{{ url_for('view_entry', entry_id=entry.id) }}" class="btn btn-primary btn-sm">Просмотр</a>
-                <a href="/edit-entry/{{ entry.id }}" class="btn btn-warning btn-sm">Редактировать</a>
-                <a href="/delete-entry/{{ entry.id }}" class="btn btn-danger btn-sm">Удалить</a>
-            </li>
-        {% endfor %}
-    </div>
+<div class="list-group mt-4" style="max-height: 550px; overflow-y: auto;">
+    {% for entry in entries %}
+    <li class="list-group-item mt-4" style="border-radius: 15px; border: 1px solid #ddd; background-color: #c1c1c1">
+        <h5>{{ entry.title }}</h5>
+        <div class="mt-4"
+             style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+            {{ entry.content[:100] | safe }}
+        </div>
+        <p><small>Дата создания: {{ entry.date_created.strftime('%d/%m/%Y | Время: %H:%M:%S') }}</small></p>
+        <p><small>Категория: {% if entry.category %}{{ entry.category }}{% else %}Без категории{% endif %}</small></p>
+        <a href="{{ url_for('view_entry', entry_id=entry.id) }}" class="btn btn-primary btn-sm">Просмотр</a>
+        <a href="/edit-entry/{{ entry.id }}" class="btn btn-warning btn-sm">Редактировать</a>
+        <a href="/delete-entry/{{ entry.id }}" class="btn btn-danger btn-sm">Удалить</a>
+    </li>
+    {% endfor %}
+</div>
 {% else %}
-    <p class="mt-5">У тебя еще нет записей в дневнике. Добавь свою первую запись!</p>
+<p class="mt-5">У тебя еще нет записей в дневнике. Добавь свою первую запись!</p>
 {% endif %}
 
 <!-- Кнопка добавления записи -->

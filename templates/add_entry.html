@@ -8,6 +8,15 @@
 <h1 class="mt-5">Добавить новую запись</h1>
 <form method="POST" id="add-form">
     <div class="mb-3 mt-5">
+        <label for="category">Категория:</label>
+        <select name="category" id="category" class="form-control">
+            <!-- Пустой вариант для выбора категории по умолчанию -->
+            <option value="" {% if not entry or not entry.category %}selected{% endif %}>Без категории</option>
+            <option value="Работа" {% if entry and entry.category == 'Работа' %}selected{% endif %}>Работа</option>
+            <option value="Хобби" {% if entry and entry.category == 'Хобби' %}selected{% endif %}>Хобби</option>
+            <option value="Учеба" {% if entry and entry.category == 'Учеба' %}selected{% endif %}>Учеба</option>
+        </select>
+
         <label for="title" class="form-label">Заголовок</label>
         <input type="text" class="form-control" id="title" name="title" required
                style="border-radius: 10px; border: 1px solid #ddd; background-color: #c1c1c1;">
@@ -36,7 +45,6 @@
         content_css: '/static/css/tinymce.css'  // Указываем отдельный файл стилей для редактора
     });
 </script>
-
 
 <script>
     const form = document.getElementById('add-form');
